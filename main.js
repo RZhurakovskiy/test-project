@@ -1,61 +1,23 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const stepsDisplay = document.getElementById('steps');
-    const speedDisplay = document.getElementById('speed');
-    const resetButton = document.getElementById('reset');
+ // Проверяем поддержку акселерометра
+        if (window.DeviceMotionEvent) {
+            console.log('Датчик движения доступен.');
 
-    if (!stepsDisplay || !speedDisplay || !resetButton) {
-        console.error("Не удалось найти HTML-элементы. Проверьте id в разметке.");
-        return;
-    }
+            // Обрабатываем данные акселерометра
+            window.addEventListener('devicemotion', event => {
+                const acceleration = event.accelerationIncludingGravity;
 
-    // Ваш основной код шагомера
-    let stepCount = 0;
-    let lastAcceleration = 0;
-    let lastStepTime = 0;
-    let averageStepTime = 0;
+                // Берем значения ускорения по осям X, Y (с учетом гравитации)
+                const x = acceleration.x || 0;
+                const y = acceleration.y || 0;
 
-    const stepLength = 0.7;
+                // Преобразуем значения осей в цвет (от -10 до 10)
+                const red = Math.min(255, Math.max(0, Math.floor((x + 10) * 12.75))); // от -10 до 10
+                const green = Math.min(255, Math.max(0, Math.floor((y + 10) * 12.75)));
 
-    if (window.DeviceMotionEvent) {
-        console.log('Начинаем отслеживание шагов...');
-        window.addEventListener('devicemotion', event => {
-            const acceleration = event.accelerationIncludingGravity;
-
-            const currentAcceleration = Math.sqrt(
-                (acceleration.x || 0) ** 2 +
-                (acceleration.y || 0) ** 2 +
-                (acceleration.z || 0) ** 2
-            );
-
-            const now = Date.now();
-
-            if (Math.abs(currentAcceleration - lastAcceleration) > 2) {
-                if (now - lastStepTime > 300) {
-                    stepCount++;
-                    const stepTime = now - lastStepTime;
-
-                    lastStepTime = now;
-                    averageStepTime = averageStepTime ? (averageStepTime + stepTime) / 2 : stepTime;
-
-                    const speed = stepLength / (averageStepTime / 1000);
-                    speedDisplay.textContent = speed.toFixed(2);
-                }
-            }
-
-            lastAcceleration = currentAcceleration;
-            stepsDisplay.textContent = stepCount;
-        });
-    } else {
-        document.body.innerHTML = '<h1>Датчики движения недоступны.</h1>';
-    }
-
-    resetButton.addEventListener('click', () => {
-        stepCount = 0;
-        lastAcceleration = 0;
-        lastStepTime = 0;
-        averageStepTime = 0;
-
-        stepsDisplay.textContent = 0;
-        speedDisplay.textContent = '0.00';
-    });
-});
+                // Устанавливаем цвет фона в зависимости от движения устройства
+                document.body.style.backgroundColor = `rgb(${red}, ${green}, 150)`;
+            });
+        } else {
+            console.log('Датчик движения не поддерживается.')
+            document.body.innerHTML = '<div>К сожалению, ваш браузер не поддерживает датчики движения.</div>';
+        }

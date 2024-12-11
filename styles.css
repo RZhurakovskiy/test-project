@@ -3,33 +3,9 @@ body {
     padding: 0;
     height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-family: Arial, sans-serif;
-    background-color: #f3f3f3;
-}
-h1 {
-    margin-bottom: 0.5em;
-}
-p {
-    margin: 0.3em 0;
-    font-size: 18px;
-}
-#data {
-    text-align: center;
-}
-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-    cursor: pointer;
+    font-size: 24px;
     transition: background-color 0.3s;
-}
-button:hover {
-    background-color: #0056b3;
 }
