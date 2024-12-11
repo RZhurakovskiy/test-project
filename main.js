@@ -1,23 +1,64 @@
+const stepsDisplay = document.getElementById('steps');
+const speedDisplay = document.getElementById('speed');
+const resetButton = document.getElementById('reset');
 
- if (window.DeviceMotionEvent) {
-    console.log('Датчик движения доступен.');
+let stepCount = 0; 
+let lastAcceleration = 0; 
+let lastStepTime = 0; 
+let averageStepTime = 0; 
 
-    
+const stepLength = 0.7; 
+
+
+if (window.DeviceMotionEvent) {
+    console.log('Начинаем отслеживание шагов...');
     window.addEventListener('devicemotion', event => {
-        const accelerometr = event.accelerationIncludingGravity;
+        const acceleration = event.accelerationIncludingGravity;
+
+        
+        const currentAcceleration = Math.sqrt(
+            (acceleration.x || 0) ** 2 + 
+            (acceleration.y || 0) ** 2 + 
+            (acceleration.z || 0) ** 2
+        );
+
+        const now = Date.now();
+        
+
+        if (Math.abs(currentAcceleration - lastAcceleration) > 2) {
+            if (now - lastStepTime > 300) { 
+                stepCount++;
+                const stepTime = now - lastStepTime;
+
+                lastStepTime = now;
+
+                
+                averageStepTime = averageStepTime
+                    ? (averageStepTime + stepTime) / 2
+                    : stepTime;
+
+                const speed = stepLength / (averageStepTime / 1000); 
+                speedDisplay.textContent = speed.toFixed(2);
+            }
+        }
 
      
-        const x = accelerometr.x || 0;
-        const y = accelerometr.y || 0;
-
-     
-        const color1 = Math.min(255, Math.max(0, Math.floor((x + 10) * 12.75)));
-        const color2 = Math.min(255, Math.max(0, Math.floor((y + 10) * 12.75)));
-
-   
-        document.body.style.backgroundColor = `rgb(${color1}, ${color2}, 150)`;
+        lastAcceleration = currentAcceleration;
+        stepsDisplay.textContent = stepCount;
     });
 } else {
-    console.log('Датчик движения не поддерживается.')
-    document.body.innerHTML = '<div>К сожалению, ваш браузер не поддерживает датчики движения.</div>';
+    console.log('Ваш браузер не поддерживает датчики движения.');
+    
+    document.body.innerHTML = '<h1>Датчики движения недоступны.</h1>';
 }
+
+
+resetButton.addEventListener('click', () => {
+    stepCount = 0;
+    lastAcceleration = 0;
+    lastStepTime = 0;
+    averageStepTime = 0;
+
+    stepsDisplay.textContent = 0;
+    speedDisplay.textContent = '0.00';
+});
